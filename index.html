@@ -94,7 +94,7 @@
         <input id="answer" type="text" inputmode="decimal" pattern="[0-9]*"
                autocomplete="off" autocorrect="off" spellcheck="false"
                placeholder="أدخل الإجابة هنا">
-        <div id="timer"><span id="time">5 ثوانٍ</span></div>
+        <div id="timer"><span id="time">7 ثوانٍ</span></div>
         <div id="msg"></div>
         <div id="score">
             <span id="scorePoints"></span> | <span id="scoreLevel"></span> | <span id="scoreStreak"></span>
@@ -122,13 +122,13 @@
 <script>
 // ← تماماً نفس الكود السابق (لا تغيير في الـ JavaScript)
 let level, points, streak, current, previousNumber, timeLeft, timer, playing, language;
-language = "ar"; level = 1; points = 0; streak = 0; current = ""; previousNumber = ""; timeLeft = 5; playing = false;
+language = "ar"; level = 1; points = 0; streak = 0; current = ""; previousNumber = ""; timeLeft = 7; playing = false;
 const MAX_LEVEL = 6;
 
 const texts = {
     ar:{instructions:`طريقة اللعب
-سيظهر رقم لا يحتوي على 9. 
-أضف 1 لكل خانة (مثال: 47 → 58).
+سيظهر لك رقم، كل ما عليك أن
+تضيف 1 لكل خانة (مثال: 47 → 58).
 تبدأ بأرقام من خانة واحدة وتصل إلى 5 خانات كحد أقصى.
 كل 5 إجابات صحيحة متتالية = مستوى جديد.
 كل إجابة صحيحة = نقطة واحدة.
@@ -137,7 +137,7 @@ const texts = {
         maxLevel:"وصلت لأقصى صعوبة: 5 خانات! استمر في جمع النقاط!", endTitle:"انتهت اللعبة!", points:"النقاط النهائية",
         reason:"سبب النهاية", restart:"إعادة اللعب", scorePoints:"النقاط", scoreLevel:"المستوى", scoreStreak:"السلسلة"},
     en:{instructions:`How to Play
-A number without 9 will appear.
+A number  will appear.
 Add +1 to each digit (example: 47 → 58).
 Max 5-digit numbers. Every 5 correct in a row = new level.
 The game continues forever at 5 digits!`,
@@ -152,7 +152,7 @@ function startGame(){level=1;points=0;streak=0;playing=true;document.getElementB
 function showLevelScreen(){clearInterval(timer);document.getElementById("gameArea").style.display="none";document.getElementById("levelScreen").style.display="block";document.getElementById("levelTitle").innerText=level>=MAX_LEVEL?texts[language].maxLevel:`${texts[language].scoreLevel} ${level}`;document.getElementById("levelMessage").innerText=texts[language].levelReady;document.getElementById("levelStartBtn").innerText=texts[language].startBtn;document.getElementById("levelStartBtn").onclick=()=>{document.getElementById("levelScreen").style.display="none";document.getElementById("gameArea").style.display="block";document.getElementById("soundStart").play();generateNumber();};}
 function updateScore(){document.getElementById("scorePoints").innerText=`${texts[language].scorePoints}: ${points}`;document.getElementById("scoreLevel").innerText=`${texts[language].scoreLevel}: ${Math.min(level,MAX_LEVEL-1)}`;document.getElementById("scoreStreak").innerText=`${texts[language].scoreStreak}: ${streak}/5`;}
 function generateNumber(){if(!playing)return;const e=Math.min(level,MAX_LEVEL-1),min=Math.pow(10,e-1),max=Math.pow(10,e)-1;let n;let a=0;do{n=Math.floor(min+Math.random()*(max-min+1)).toString();a++;}while((n.includes("9")||n===previousNumber)&&a<30);previousNumber=current;current=n;document.getElementById("number").style.transform="scale(0.9)";setTimeout(()=>{document.getElementById("number").innerText=current;document.getElementById("number").style.transform="scale(1)";},100);document.getElementById("answer").value="";document.getElementById("msg").innerText="";document.getElementById("answer").focus();startTimer();}
-function startTimer(){clearInterval(timer);timeLeft=5;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;timer=setInterval(()=>{timeLeft--;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;if(timeLeft<=0)endGame(`${texts[language].reason}: ${language==="ar"?"انتهى الوقت":"Time's up"}`);},1000);}
+function startTimer(){clearInterval(timer);timeLeft=7;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;timer=setInterval(()=>{timeLeft--;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;if(timeLeft<=0)endGame(`${texts[language].reason}: ${language==="ar"?"انتهى الوقت":"Time's up"}`);},1000);}
 function checkAnswerAuto(){if(!playing)return;const raw=document.getElementById("answer").value.trim();const ans=normalize(raw);if(ans.length!==current.length)return;const correct=current.split("").map(d=>+d+1).join("");if(ans===correct){clearInterval(timer);points++;streak++;document.getElementById("msg").innerText=texts[language].correct;document.getElementById("soundCorrect").play();updateScore();if(streak>=5){if(level<MAX_LEVEL)level++;streak=0;document.getElementById("msg").innerText=texts[language].newLevel;setTimeout(showLevelScreen,900);}else{setTimeout(generateNumber,600);}}else{document.getElementById("soundWrong").play();endGame(`${texts[language].reason}: ${language==="ar"?"إجابة خاطئة":"Wrong answer"}`);}}
 function endGame(r){clearInterval(timer);playing=false;document.getElementById("gameArea").style.display="none";document.getElementById("levelScreen").style.display="none";document.getElementById("endScreen").style.display="block";document.getElementById("endTitle").innerText=texts[language].endTitle;document.getElementById("endPoints").innerText=`${texts[language].points}: ${points}`;document.getElementById("endReasonText").innerText=r;document.getElementById("restartBtn").innerText=texts[language].restart;document.getElementById("restartBtn").onclick=showInstructions;}
 function initGame(){document.querySelectorAll("#langButtons button").forEach(b=>{b.addEventListener("click",()=>{language=b.dataset.lang;document.documentElement.dir=language==="ar"?"rtl":"ltr";document.documentElement.lang=language;document.getElementById("langSelect").style.display="none";showInstructions();});});document.getElementById("answer").addEventListener("input",checkAnswerAuto);}
@@ -160,3 +160,4 @@ window.onload=initGame;
 </script>
 </body>
 </html>
+
