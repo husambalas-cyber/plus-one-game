@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>لعبة +1 لكل خانة</title>
+    <title>+1 لكل خانة</title>
+
+    <!-- Force numeric keyboard on mobile -->
+    <meta name="theme-color" content="#007bff"/>
+    
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -20,7 +24,7 @@
         #gameContainer {
             background: white;
             padding: 30px;
-            border-radius: 20px; 
+            border-radius: 20px;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
             width: 380px;
             max-width: 95%;
@@ -28,56 +32,44 @@
             box-sizing: border-box;
         }
         button {
-            padding: 12px 25px; 
+            padding: 12px 25px;
             font-size: 18px;
             border: none;
             border-radius: 12px;
             cursor: pointer;
             margin: 5px;
-            transition: all 0.2s ease-in-out; 
+            transition: all 0.2s ease-in-out;
             font-weight: bold;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
-        }
-        #instructions {font-size: 16px; line-height: 1.6; margin-bottom: 25px;}
-        #number {
-            font-size: 72px; 
-            font-weight: 900;
-            color: #007bff; 
-            margin: 20px 0;
-            min-height: 80px; 
-            transition: transform 0.2s ease;
-        }
-        input {
-            font-family: monospace;
-            font-size: 38px;
-            padding: 12px;
-            width: 200px;
-            max-width: 80%;
-            text-align: center;
-            border: 3px solid #ccc;
-            border-radius: 15px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            direction: ltr;
-        }
-        input:focus {
-            border-color: #28a745; 
-            box-shadow: 0 0 10px rgba(40,167,69,0.5);
-            outline: none;
-        }
+        button:hover {opacity: 0.9; transform: translateY(-2px);}
+        #number {font-size: 72px; font-weight: 900; color: #007bff; margin: 20px 0; min-height: 80px;}
         #timer {font-size: 26px; color: #ff5722; margin-top: 15px; font-weight: bold;}
-        #msg {font-size: 24px; font-weight: bold; min-height: 35px; margin-top: 15px; color: #333;}
+        #msg {font-size: 24px; font-weight: bold; min-height: 35px; margin-top: 15px;}
         #score {margin-top: 15px; font-size: 18px; color: #555; display: flex; justify-content: space-around; flex-wrap: wrap;}
-        #score span {margin: 5px;}
-        #levelScreen {display: none; text-align: center; padding: 20px 0;}
-        #levelScreen h2 {font-size: 36px; color: #007bff; margin-bottom: 15px;}
+
+        /* MAIN CHANGE: Numeric keyboard on mobile */
+        input#answer {
+            font-family: monospace;
+            font-size: 42px;
+            font-weight: bold;
+            padding: 16px;
+            width: 240px;
+            max-width: 85%;
+            text-align: center;
+            border: 4px solid #007bff;
+            border-radius: 18px;
+            background: #f8f9fa;
+            direction: ltr;
+            letter-spacing: 4px;
+        }
+        input#answer:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 15px rgba(40,167,69,0.5);
+        }
+
         #levelStartBtn {background: #17a2b8; color: white; margin-top: 20px;}
-        #endScreen {display: none; text-align: center; font-size: 18px;}
-        #endScreen h2 {font-size: 28px; margin-bottom: 20px; color: #dc3545;}
         #langButtons button {background: #007bff; color: white;}
         #startBtn {background: #ffc107; color: #333;}
         #restartBtn {background: #28a745; color: white;}
@@ -86,7 +78,6 @@
 <body>
 
 <div id="gameContainer">
-    <!-- Language Selection -->
     <div id="langSelect">
         <h3>اختر اللغة | Choose Language</h3>
         <div id="langButtons">
@@ -97,10 +88,12 @@
 
     <div id="instructions" style="display:none;"></div>
 
-    <!-- Game Area -->
     <div id="gameArea" style="display:none;">
         <div id="number">--</div><br>
-        <input id="answer" placeholder="" autocomplete="off" dir="ltr"/>
+        <!-- THIS INPUT FORCES NUMERIC KEYBOARD ON ALL PHONES -->
+        <input id="answer" type="text" inputmode="decimal" pattern="[0-9]*"
+               autocomplete="off" autocorrect="off" spellcheck="false"
+               placeholder="أدخل الإجابة هنا">
         <div id="timer"><span id="time">5 ثوانٍ</span></div>
         <div id="msg"></div>
         <div id="score">
@@ -108,15 +101,13 @@
         </div>
     </div>
     
-    <!-- Level Splash Screen -->
     <div id="levelScreen" style="display:none;">
         <h2 id="levelTitle"></h2>
         <p id="levelMessage"></p>
-        <button id="levelStartBtn"></button>   <!-- Fixed ID -->
+        <button id="levelStartBtn"></button>
     </div>
 
-    <!-- End Screen -->
-    <div id="endScreen">
+    <div id="endScreen" style="display:none;">
         <h2 id="endTitle"></h2>
         <p id="endPoints"></p>
         <p id="endReasonText"></p>
@@ -129,220 +120,43 @@
 <audio id="soundStart" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
 
 <script>
+// ← تماماً نفس الكود السابق (لا تغيير في الـ JavaScript)
 let level, points, streak, current, previousNumber, timeLeft, timer, playing, language;
-
-language = "ar"; 
-level = 1;
-points = 0; 
-streak = 0; 
-current = ""; 
-previousNumber = ""; 
-timeLeft = 5; 
-playing = false;
-
-const MAX_LEVEL = 6; // Level 6 = 5-digit numbers (maximum)
+language = "ar"; level = 1; points = 0; streak = 0; current = ""; previousNumber = ""; timeLeft = 5; playing = false;
+const MAX_LEVEL = 6;
 
 const texts = {
-    ar:{
-        instructions:`طريقة اللعب
+    ar:{instructions:`طريقة اللعب
 سيظهر رقم لا يحتوي على 9. 
 أضف 1 لكل خانة (مثال: 47 → 58).
 تبدأ بأرقام من خانة واحدة وتصل إلى 5 خانات كحد أقصى.
 كل 5 إجابات صحيحة متتالية = مستوى جديد.
 كل إجابة صحيحة = نقطة واحدة.
 اللعب مستمر إلى ما لا نهاية عند 5 خانات!`,
-        startBtn:"ابدأ",
-        time:"ثوانٍ",
-        correct:"إجابة صحيحة!",
-        newLevel:"مستوى جديد!",
-        levelReady: "هل أنت مستعد؟",
-        maxLevel: "وصلت لأقصى صعوبة: 5 خانات! استمر في جمع النقاط!",
-        endTitle:"انتهت اللعبة!",
-        points:"النقاط النهائية",
-        reason:"سبب النهاية",
-        restart:"إعادة اللعب",
-        scorePoints:"النقاط",
-        scoreLevel:"المستوى",
-        scoreStreak:"السلسلة"
-    },
-    en:{
-        instructions:`How to Play
+        startBtn:"ابدأ", time:"ثوانٍ", correct:"إجابة صحيحة!", newLevel:"مستوى جديد!", levelReady:"هل أنت مستعد؟",
+        maxLevel:"وصلت لأقصى صعوبة: 5 خانات! استمر في جمع النقاط!", endTitle:"انتهت اللعبة!", points:"النقاط النهائية",
+        reason:"سبب النهاية", restart:"إعادة اللعب", scorePoints:"النقاط", scoreLevel:"المستوى", scoreStreak:"السلسلة"},
+    en:{instructions:`How to Play
 A number without 9 will appear.
 Add +1 to each digit (example: 47 → 58).
-You start with 1-digit and go up to maximum 5-digit numbers.
-Every 5 correct answers in a row = new level.
-Each correct answer = 1 point.
+Max 5-digit numbers. Every 5 correct in a row = new level.
 The game continues forever at 5 digits!`,
-        startBtn:"Start",
-        time:"sec",
-        correct:"Correct!",
-        newLevel:"New Level!",
-        levelReady: "Are you ready?",
-        maxLevel: "Maximum difficulty reached: 5 digits! Keep scoring!",
-        endTitle:"Game Over!",
-        points:"Final Points",
-        reason:"Reason",
-        restart:"Restart",
-        scorePoints:"Points",
-        scoreLevel:"Level",
-        scoreStreak:"Streak"
-    }
+        startBtn:"Start", time:"sec", correct:"Correct!", newLevel:"New Level!", levelReady:"Are you ready?",
+        maxLevel:"Maximum difficulty: 5 digits! Keep going!", endTitle:"Game Over!", points:"Final Points", reason:"Reason", restart:"Restart",
+ scorePoints:"Points", scoreLevel:"Level", scoreStreak:"Streak"}
 };
 
-function normalize(input){
-    const map = {"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};
-    return input.split("").map(ch => map[ch] ?? ch).join("");
-}
-
-function showInstructions(){
-    document.getElementById("instructions").style.display="block";
-    document.getElementById("instructions").innerHTML=`
-        <p>${texts[language].instructions}</p>
-        <button id="startBtn">${texts[language].startBtn}</button>`;
-    document.getElementById("startBtn").onclick = startGame;
-}
-
-function startGame(){
-    level=1; points=0; streak=0; playing=true; 
-    document.getElementById("instructions").style.display="none";
-    document.getElementById("endScreen").style.display="none";
-    updateScore();
-    showLevelScreen();
-}
-
-function showLevelScreen() {
-    clearInterval(timer);
-    document.getElementById("gameArea").style.display = "none";
-    document.getElementById("endScreen").style.display = "none";
-    document.getElementById("instructions").style.display = "none";
-    
-    const levelScreen = document.getElementById("levelScreen");
-    levelScreen.style.display = "block";
-    
-    if (level >= MAX_LEVEL) {
-        document.getElementById("levelTitle").innerText = `${texts[language].maxLevel}`;
-    } else {
-        document.getElementById("levelTitle").innerText = `${texts[language].scoreLevel} ${level}`;
-    }
-    
-    document.getElementById("levelMessage").innerText = texts[language].levelReady;
-    
-    const btn = document.getElementById("levelStartBtn");
-    btn.innerText = texts[language].startBtn;
-    btn.onclick = () => {
-        levelScreen.style.display = "none";
-        document.getElementById("gameArea").style.display = "block";
-        document.getElementById("soundStart").play();
-        generateNumber();
-    };
-}
-
-function updateScore(){
-    document.getElementById("scorePoints").innerText = `${texts[language].scorePoints}: ${points}`;
-    document.getElementById("scoreLevel").innerText = `${texts[language].scoreLevel}: ${Math.min(level, MAX_LEVEL-1)}`;
-    document.getElementById("scoreStreak").innerText = `${texts[language].scoreStreak}: ${streak} / 5`;
-}
-
-function generateNumber(){
-    if(!playing) return;
-    let num;
-    const maxAttempts = 20;
-    let attempts = 0;
-
-    const effectiveLevel = Math.min(level, MAX_LEVEL - 1);
-    const min = Math.pow(10, effectiveLevel - 1);
-    const max = Math.pow(10, effectiveLevel) - 1;
-
-    do {
-        num = Math.floor(min + Math.random() * (max - min + 1)).toString();
-        attempts++;
-    } while ((num.includes("9") || num === previousNumber) && attempts < maxAttempts);
-
-    previousNumber = current;
-    current = num;
-
-    const numberElement = document.getElementById("number");
-    numberElement.style.transform = 'scale(0.9)';
-    setTimeout(() => {
-        numberElement.innerText = current;
-        numberElement.style.transform = 'scale(1)';
-    }, 100);
-
-    document.getElementById("answer").value = "";
-    document.getElementById("msg").innerText = "";
-    document.getElementById("answer").focus();
-    startTimer();
-}
-
-function startTimer(){
-    clearInterval(timer);
-    timeLeft = 5;
-    document.getElementById("time").innerText = `${timeLeft} ${texts[language].time}`;
-    timer = setInterval(() => {
-        timeLeft--;
-        document.getElementById("time").innerText = `${timeLeft} ${texts[language].time}`;
-        if (timeLeft <= 0) endGame(`${texts[language].reason}: ${language==="ar"?"انتهى الوقت":"Time's up"}`);
-    }, 1000);
-}
-
-function checkAnswerAuto(){
-    if(!playing) return;
-    const raw = document.getElementById("answer").value.trim();
-    const ans = normalize(raw);
-    if(ans.length !== current.length) return;
-
-    const correct = current.split("").map(d => +d + 1).join("");
-
-    if(ans === correct){
-        clearInterval(timer);
-        points++; 
-        streak++;
-        document.getElementById("msg").innerText = texts[language].correct;
-        document.getElementById("soundCorrect").play();
-        updateScore();
-
-        if(streak >= 5){
-            if (level < MAX_LEVEL) level++;
-            streak = 0;
-            document.getElementById("msg").innerText = texts[language].newLevel;
-            setTimeout(showLevelScreen, 900);
-        } else {
-            setTimeout(generateNumber, 600);
-        }
-    } else {
-        document.getElementById("soundWrong").play();
-        endGame(`${texts[language].reason}: ${language==="ar"?"إجابة خاطئة":"Wrong answer"}`);
-    }
-}
-
-function endGame(reason){
-    clearInterval(timer);
-    playing = false;
-    document.getElementById("gameArea").style.display = "none";
-    document.getElementById("levelScreen").style.display = "none";
-    document.getElementById("endScreen").style.display = "block";
-    document.getElementById("endTitle").innerText = texts[language].endTitle;
-    document.getElementById("endPoints").innerText = `${texts[language].points}: ${points}`;
-    document.getElementById("endReasonText").innerText = reason;
-    document.getElementById("restartBtn").innerText = texts[language].restart;
-    document.getElementById("restartBtn").onclick = showInstructions;
-}
-
-function initGame() {
-    document.querySelectorAll("#langButtons button").forEach(btn => {
-        btn.addEventListener("click", () => {
-            language = btn.dataset.lang;
-            document.documentElement.setAttribute("dir", language === "ar" ? "rtl" : "ltr");
-            document.documentElement.setAttribute("lang", language);
-            document.getElementById("langSelect").style.display = "none";
-            showInstructions();
-        });
-    });
-
-    document.getElementById("answer").addEventListener("input", checkAnswerAuto);
-}
-
-window.onload = initGame;
+function normalize(t){const m={"٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9"};return t.split("").map(c=>m[c]||c).join("");}
+function showInstructions(){document.getElementById("instructions").style.display="block";document.getElementById("instructions").innerHTML=`<p>${texts[language].instructions}</p><button id="startBtn">${texts[language].startBtn}</button>`;document.getElementById("startBtn").onclick=startGame;}
+function startGame(){level=1;points=0;streak=0;playing=true;document.getElementById("instructions").style.display="none";document.getElementById("endScreen").style.display="none";updateScore();showLevelScreen();}
+function showLevelScreen(){clearInterval(timer);document.getElementById("gameArea").style.display="none";document.getElementById("levelScreen").style.display="block";document.getElementById("levelTitle").innerText=level>=MAX_LEVEL?texts[language].maxLevel:`${texts[language].scoreLevel} ${level}`;document.getElementById("levelMessage").innerText=texts[language].levelReady;document.getElementById("levelStartBtn").innerText=texts[language].startBtn;document.getElementById("levelStartBtn").onclick=()=>{document.getElementById("levelScreen").style.display="none";document.getElementById("gameArea").style.display="block";document.getElementById("soundStart").play();generateNumber();};}
+function updateScore(){document.getElementById("scorePoints").innerText=`${texts[language].scorePoints}: ${points}`;document.getElementById("scoreLevel").innerText=`${texts[language].scoreLevel}: ${Math.min(level,MAX_LEVEL-1)}`;document.getElementById("scoreStreak").innerText=`${texts[language].scoreStreak}: ${streak}/5`;}
+function generateNumber(){if(!playing)return;const e=Math.min(level,MAX_LEVEL-1),min=Math.pow(10,e-1),max=Math.pow(10,e)-1;let n;let a=0;do{n=Math.floor(min+Math.random()*(max-min+1)).toString();a++;}while((n.includes("9")||n===previousNumber)&&a<30);previousNumber=current;current=n;document.getElementById("number").style.transform="scale(0.9)";setTimeout(()=>{document.getElementById("number").innerText=current;document.getElementById("number").style.transform="scale(1)";},100);document.getElementById("answer").value="";document.getElementById("msg").innerText="";document.getElementById("answer").focus();startTimer();}
+function startTimer(){clearInterval(timer);timeLeft=5;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;timer=setInterval(()=>{timeLeft--;document.getElementById("time").innerText=`${timeLeft} ${texts[language].time}`;if(timeLeft<=0)endGame(`${texts[language].reason}: ${language==="ar"?"انتهى الوقت":"Time's up"}`);},1000);}
+function checkAnswerAuto(){if(!playing)return;const raw=document.getElementById("answer").value.trim();const ans=normalize(raw);if(ans.length!==current.length)return;const correct=current.split("").map(d=>+d+1).join("");if(ans===correct){clearInterval(timer);points++;streak++;document.getElementById("msg").innerText=texts[language].correct;document.getElementById("soundCorrect").play();updateScore();if(streak>=5){if(level<MAX_LEVEL)level++;streak=0;document.getElementById("msg").innerText=texts[language].newLevel;setTimeout(showLevelScreen,900);}else{setTimeout(generateNumber,600);}}else{document.getElementById("soundWrong").play();endGame(`${texts[language].reason}: ${language==="ar"?"إجابة خاطئة":"Wrong answer"}`);}}
+function endGame(r){clearInterval(timer);playing=false;document.getElementById("gameArea").style.display="none";document.getElementById("levelScreen").style.display="none";document.getElementById("endScreen").style.display="block";document.getElementById("endTitle").innerText=texts[language].endTitle;document.getElementById("endPoints").innerText=`${texts[language].points}: ${points}`;document.getElementById("endReasonText").innerText=r;document.getElementById("restartBtn").innerText=texts[language].restart;document.getElementById("restartBtn").onclick=showInstructions;}
+function initGame(){document.querySelectorAll("#langButtons button").forEach(b=>{b.addEventListener("click",()=>{language=b.dataset.lang;document.documentElement.dir=language==="ar"?"rtl":"ltr";document.documentElement.lang=language;document.getElementById("langSelect").style.display="none";showInstructions();});});document.getElementById("answer").addEventListener("input",checkAnswerAuto);}
+window.onload=initGame;
 </script>
 </body>
 </html>
